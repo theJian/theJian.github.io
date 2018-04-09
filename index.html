@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<title>HermitShed</title>
+	<style type="text/css">
+		* { margin: 0; padding: 0; font-family: Palatino, serif; color: #000; user-select: none; }
+		html, body {
+			height: 100%;
+			background: #d1e5ef;
+		}
+		body {
+			position: relative;
+		}
+		header {
+			position: absolute;
+			top: 50%;
+			left: 50%;
+			transform: translate(-50%, -50%);
+		}
+		footer {
+			position: absolute;
+			bottom: 8pt;
+			font-size: 10pt;
+			width: 100%;
+			text-align: center;
+			font-style: italic;
+		}
+		ul {
+			list-style-type: none;
+		}
+		li {
+			text-align: center;
+			font-size: 12pt;
+			margin: 0 16pt 8pt;
+			position: relative;
+		}
+		li:before, li:after {
+			content: '';
+			position: absolute;
+			width: 0%;
+			height: 1pt;
+			top: 50%;
+			margin-top: -.5pt;
+			background: #000;
+			transition: width .1s ease-out;
+		}
+		li:before {
+			left: -2pt;
+		}
+		li:after {
+			right: 2pt;
+		}
+		li:hover:before, li:hover:after {
+			width: 10pt;
+		}
+		a {
+			text-decoration: none;
+		}
+		h1 {
+			cursor: default;
+			font-size: 24pt;
+			margin-bottom: 16pt;
+			font-weight: normal;
+		}
+	</style>
+</head>
+<body>
+	<header>
+		<h1>HermitShed</h1>
+		<nav>
+			<ul>
+				<li><a href="https://github.com/thejian">Code</a></li>
+				<li><a href="https://ello.co/thejian">Paintings</a></li>
+				<li><a href="https://steamcommunity.com/id/theJian/">Games</a></li>
+			</ul>
+		</nav>
+	</header>
+	<footer>
+		<a href="mailto:thejianmail@gmail.com">thejianmail@gmail.com</a>
+	</footer>
+</body>
+</html>
