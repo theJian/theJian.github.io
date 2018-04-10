@@ -6,7 +6,7 @@
 		* { margin: 0; padding: 0; font-family: Palatino, serif; color: #000; user-select: none; }
 		html, body {
 			height: 100%;
-			background: #d1e5ef;
+			background: #f7f3ed;
 		}
 		body {
 			position: relative;
@@ -19,8 +19,8 @@
 		}
 		footer {
 			position: absolute;
-			bottom: 8pt;
-			font-size: 10pt;
+			bottom: 8px;
+			font-size: 12px;
 			width: 100%;
 			text-align: center;
 			font-style: italic;
@@ -30,41 +30,49 @@
 		}
 		li {
 			text-align: center;
-			font-size: 12pt;
-			margin: 0 16pt 8pt;
+			font-size: 16px;
+			margin: 0 24px 8px;
 			position: relative;
 		}
 		li:before, li:after {
 			content: '';
 			position: absolute;
 			width: 0%;
-			height: 1pt;
+			height: 1px;
 			top: 50%;
-			margin-top: -.5pt;
+			margin-top: -.5px;
 			background: #000;
 			transition: width .1s ease-out;
 		}
 		li:before {
-			left: -2pt;
+			left: -2px;
 		}
 		li:after {
-			right: 2pt;
+			right: 2px;
 		}
 		li:hover:before, li:hover:after {
-			width: 10pt;
+			width: 10px;
 		}
 		a {
 			text-decoration: none;
 		}
 		h1 {
 			cursor: default;
-			font-size: 24pt;
-			margin-bottom: 16pt;
+			font-size: 32px;
+			margin-bottom: 16px;
 			font-weight: normal;
 		}
+		canvas {
+			display: block;
+			position: fixed;
+			top: 0;
+			left: 0;
+		}
 	</style>
+	<script type="text/javascript" src="js/script.js" defer></script>
 </head>
 <body>
+	<canvas id="bg"></canvas>
 	<header>
 		<h1>HermitShed</h1>
 		<nav>
