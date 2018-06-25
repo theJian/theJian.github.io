@@ -18,7 +18,7 @@
   function plot() {
     v = (ra[Math.floor(Math.random() * 3)]).map(function(a, i) { return (a + v[i]) / 2; });
     ctx.fillRect(Math.floor(v[0]), Math.floor(v[1]), 1, 1);
-    setTimeout(plot, 10);
+    setTimeout(plot, 4);
   }
   ctx.fillStyle = fillColor;
   ctx.canvas.width = w;
