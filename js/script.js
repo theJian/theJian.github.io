@@ -2,7 +2,7 @@
 (function () {
   'use strict';
 
-  var SKY_CHARS = ['.', '·', '`', ',', "'", '~'];
+  var SKY_CHARS = ['.', '.', '`', ',', "'", '~'];
   var SKY_PALETTE = ['#9fd8ff', '#cfe6ff', '#7f9fd8'];
   var LINKS = [
     { text: 'Code', href: 'https://github.com/thejian' },
@@ -220,7 +220,7 @@
           let light = .08;
           let room = null;
           if (edge) {
-            char = fromTop < roofHeight && roof === 'pitched' ? (bx === left ? '/' : '\\') : '│';
+            char = fromTop < roofHeight && roof === 'pitched' ? (bx === left ? '/' : '\\') : '|';
             light = depth === 1 ? 1 : .48;
           }
           else if (fromTop === 0 && roof === 'flat') { char = '_'; light = .5; }
@@ -281,7 +281,7 @@
         const signChance = .2 + .45 * (signY / rows);
         if (random() >= signChance) return;
         const patternWidth = Math.floor(range(3, Math.min(8, w - 3)));
-        const motif = pick(['╱╲', '≋·', '┆▪', '+·', '::', '<>', '~:']);
+        const motif = pick(['/\\', '~.', '|#', '+.', '::', '<>', '~:']);
         const pattern = Array.from({ length: patternWidth }, (_, column) =>
           random() < .12 ? pick(['.', ':', '+']) : motif[column % motif.length]).join('');
         const signWidth = patternWidth;
