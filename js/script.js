@@ -309,8 +309,8 @@
       }
     }
 
-    // Group boundaries separate the nearer buildings while revealing the distant city.
-    const gapCount = random() < .3 ? 2 : 1;
+    // Narrow grids keep one continuous skyline; wider grids reveal the distant city between groups.
+    const gapCount = cols < 80 ? 0 : random() < .3 ? 2 : 1;
     const groups = [];
     let groupStart = 0;
     for (let i = 1; i <= gapCount; i++) {
