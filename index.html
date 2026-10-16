@@ -1,90 +1,61 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-	<title>HermitShed</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>chabuduo.in</title>
 	<style type="text/css">
-		* { margin: 0; padding: 0; font-family: Palatino, serif; color: #000; user-select: none; }
+		* { margin: 0; padding: 0; font-family: ui-monospace, Menlo, Monaco, "Cascadia Mono", "Segoe UI Mono", "Roboto Mono", "Ubuntu Mono", "Source Code Pro", "Fira Mono", "Consolas", "Courier New", monospace; color: #e8e2d4; }
 		html, body {
 			height: 100%;
-			background: #f7f3ed;
+			background: #04050a;
 		}
 		body {
 			position: relative;
 		}
-		header {
-			position: absolute;
-			top: 50%;
-			left: 50%;
-			transform: translate(-50%, -50%);
-		}
-		footer {
-			position: absolute;
-			bottom: 8px;
-			font-size: 12px;
-			width: 100%;
-			text-align: center;
-			font-style: italic;
-		}
-		ul {
-			list-style-type: none;
-		}
-		li {
-			text-align: center;
-			font-size: 16px;
-			margin: 0 24px 8px;
-			position: relative;
-		}
-		li:before, li:after {
-			content: '';
-			position: absolute;
-			width: 0%;
-			height: 1px;
-			top: 50%;
-			margin-top: -.5px;
-			background: #000;
-			transition: width .1s ease-out;
-		}
-		li:before {
-			left: -2px;
-		}
-		li:after {
-			right: 2px;
-		}
-		li:hover:before, li:hover:after {
-			width: 10px;
-		}
 		a {
 			text-decoration: none;
 		}
-		h1 {
-			cursor: default;
-			font-size: 32px;
-			margin-bottom: 16px;
-			font-weight: normal;
+		a:hover {
+			background: #e8e2d4;
 		}
-		canvas {
+		a:hover .l {
+			color: #04050a !important;
+			text-shadow: none;
+		}
+		#city {
 			display: block;
 			position: fixed;
 			top: 0;
 			left: 0;
+			/* fluid type: user preference sets the em bounds, the px base keeps
+			   zoom effective, and the small vw term scales the grid with the
+			   viewport; max is 2.5x min so 200% zoom/resize stays possible */
+			font-size: clamp(0.75rem, 0.47rem + 0.6vw, 1.875rem);
+			line-height: 1;
+			font-weight: bold;
+			white-space: pre;
 		}
+		.s, .l { font-weight: normal; text-shadow: 0 0 0.33em currentColor; }
+		.obstruction-light { animation: beacon-blink 1.8s step-end infinite; }
+		.neon-sign { text-shadow: 0 0 .35em currentColor; animation: var(--neon-pattern, neon-blink) 1.2s var(--neon-timing, step-end) infinite; }
+		.tower-wave { text-shadow: 0 0 .3em currentColor; animation: tower-wave 1.4s ease-in-out infinite; }
+		@keyframes tower-wave { 0%, 15%, 65%, 100% { opacity: .08; } 35%, 45% { opacity: 1; } }
+		@keyframes neon-blink { 0%, 44%, 100% { opacity: 1; } 48%, 88% { opacity: .12; } 92% { opacity: .65; } }
+		@keyframes neon-double { 0%, 34%, 100% { opacity: 1; } 18%, 49% { opacity: .08; } }
+		@keyframes neon-flicker { 0%, 25%, 58%, 75%, 100% { opacity: 1; } 12%, 37%, 65%, 86% { opacity: .08; } }
+		@keyframes neon-blackout { 0%, 95%, 100% { opacity: 1; } 66% { opacity: .05; } }
+		@keyframes neon-pulse { 0%, 100% { opacity: 1; } 50% { opacity: .18; } }
+		@keyframes neon-chase { 0%, 100% { opacity: 1; } 40% { opacity: .08; } }
+		@keyframes beacon-blink { 0%, 100% { opacity: 1; } 40% { opacity: 0; } }
+		@media (prefers-reduced-motion: reduce) {
+			.obstruction-light, .neon-sign, .tower-wave { animation: none; }
+		}
+
 	</style>
 	<script type="text/javascript" src="js/script.js" defer></script>
 </head>
 <body>
-	<canvas id="bg"></canvas>
-	<header>
-		<h1>HermitShed</h1>
-		<nav>
-			<ul>
-				<li><a href="https://github.com/thejian">Code</a></li>
-				<li><a href="https://ello.co/thejian">Paintings</a></li>
-				<li><a href="https://steamcommunity.com/id/theJian/">Games</a></li>
-			</ul>
-		</nav>
-	</header>
-	<footer>
-		<a href="mailto:thejianmail@gmail.com">thejianmail@gmail.com</a>
-	</footer>
+	<pre id="city"></pre>
 </body>
 </html>
