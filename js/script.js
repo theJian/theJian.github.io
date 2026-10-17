@@ -23,7 +23,7 @@
   var pick = function (arr) { return arr[Math.floor(Math.random() * arr.length)]; };
 
   var cols, rows, groundRow, grid;
-  var timers = [];
+  var animationFrame;
   var windowRooms = [], skyEls = [];
 
   function rgba(hex, a) {
@@ -131,8 +131,8 @@
     const range = (min, max) => min + random() * (max - min);
     const pick = items => items[Math.floor(random() * items.length)];
     const palettes = [
-      [49, 100, 232], [48, 115, 240], [61, 185, 195],
-      [21, 164, 111], [213, 113, 25], [203, 202, 37], [168, 192, 43],
+      [166, 124, 124], [138, 154, 134], [180, 163, 123],
+      [126, 143, 163], [160, 138, 159], [134, 163, 160],
     ];
     const cells = new Array(cols * rows).fill(null);
     function set(x, y, char, color, light, neon = null, room = null) {
@@ -152,9 +152,24 @@
       const windowGlyphs = ['0', 'O', 'Z', '8', '&', 'X', '#', '+'];
       const primary = distinct(windowGlyphs, pick(windowGlyphs), neighbors.map(other => other.primary));
       const secondary = primary;
-      buildings.push({ x, w, palette, primary });
+      const outline = { x, w, palette, primary };
+      buildings.push(outline);
       const top = rows - h;
       const side = Math.max(2, Math.floor(w * .22));
+      const deckInner = Math.max(5, 2 * Math.floor((Math.min(w, 19) - 9) / 2) + 1);
+      const towerHead = roof === 'tower' ? [
+        ':',
+        ...Array.from({ length: Math.max(0, Math.min(4, Math.floor(h * .12) - 1)) }, () => '|'),
+        ':|:',
+        '|||',
+        '_'.repeat(Math.max(0, (deckInner - 5) / 2)) + '|||' + '_'.repeat(Math.max(0, (deckInner - 5) / 2)),
+        '/' + '='.repeat(deckInner - 2) + '\\',
+        '---<' + '~'.repeat(deckInner) + '>---',
+        '\\' + '-'.repeat(deckInner - 2) + '/',
+        '\\' + '_'.repeat(deckInner - 4) + '/',
+        deckInner >= 7 ? '\\| |/' : '\\|/',
+        '| |',
+      ] : null;
       const roofHeight = roof === 'flat' ? 0 : Math.max(3, Math.floor(h * (roof === 'dome' || roof === 'pitched' ? range(.08, .14) : range(.16, .3))));
       const period = pick([3, 4, 5]);
       const style = Math.floor(random() * 4);
@@ -182,18 +197,16 @@
           offOpacity: range(.07, .16),
         }));
       });
+      let previousLeft, previousRight;
       for (let y = Math.max(0, top); y < rows; y++) {
         const fromTop = y - top;
         const floorChar = pick(['-', '=']);
         let left = 0;
         let right = w;
         if (roof === 'tower') {
-          // A thin mast, a wide observation deck, and a shaft that flares at the base.
-          const progress = fromTop / h;
-          const deck = Math.max(0, Math.min(1, (progress - .12) / .05, (.28 - progress) / .05));
-          const towerWidth = progress < .12 ? 1
-            : progress < .28 ? Math.max(3, Math.floor(w * (.45 + .55 * deck)))
-              : Math.max(3, Math.floor(w * (.2 + .3 * Math.pow((progress - .28) / .72, 2))));
+          const progress = Math.max(0, fromTop - towerHead.length) / Math.max(1, h - towerHead.length - 1);
+          const towerWidth = fromTop < towerHead.length ? towerHead[fromTop].length
+            : Math.floor(3 + Math.max(0, Math.floor(w * .5) - 3) * progress * progress);
           left = Math.floor(w / 2) - Math.floor(towerWidth / 2);
           right = left + towerWidth;
         } else if (fromTop < roofHeight) {
@@ -209,6 +222,31 @@
           };
           left = Math.min(Math.floor(w / 2) - 1, Math.floor(profiles[roof]));
           right = roof === 'slant' ? w - Math.floor(progress * (w - 3)) : w - left;
+          if (roof === 'pitched' && fromTop === 0) {
+            left = Math.floor(w / 2) - 1;
+            right = left + 3;
+          }
+        }
+        if (fromTop === 0) {
+          outline.roofLeft = left;
+          outline.roofRight = right;
+        }
+        if (fromTop === 0 && roof === 'pitched') {
+          set(x + Math.floor(w / 2), top - 1, '^', palette, depth * .65);
+        } else if (fromTop === 0 && roof !== 'tower' && right - left > 2) {
+          const roofChar = pick(['_', '-', '=']);
+          const capWalls = random() < .5;
+          for (let bx = left; bx < right; bx++) {
+            const edge = bx === left || bx === right - 1;
+            if (!edge || capWalls) set(x + bx, top - 1, edge ? '|' : roofChar, palette, depth * .65);
+          }
+        }
+        // Bridge wider setbacks above the next row's wall or diagonal edge.
+        if ((roof === 'steps' || roof === 'crown' || roof === 'pitched' || (roof === 'tower' && fromTop >= towerHead.length)) && previousLeft !== undefined) {
+          const ledgeLight = depth * (depth === 1 ? 1 : .48);
+          const slope = roof === 'pitched' || roof === 'tower' ? 1 : 0;
+          for (let bx = left + slope; bx < previousLeft; bx++) set(x + bx, y - 1, '_', palette, ledgeLight);
+          for (let bx = previousRight; bx < right - slope; bx++) set(x + bx, y - 1, '_', palette, ledgeLight);
         }
         for (let bx = left; bx < right; bx++) {
           const edge = bx === left || bx === right - 1;
@@ -219,11 +257,22 @@
           let char = ' ';
           let light = .08;
           let room = null;
-          if (edge) {
-            char = fromTop < roofHeight && roof === 'pitched' ? (bx === left ? '/' : '\\') : '|';
+          const headChar = roof === 'tower' && fromTop < towerHead.length ? towerHead[fromTop].charAt(bx - left) : null;
+          // Blank slots in the head use the same procedural filling as the shaft.
+          if (headChar && headChar !== ' ') {
+            char = headChar;
+            light = 1;
+          }
+          else if (edge) {
+            if (roof === 'tower') {
+              char = bx === left && left < previousLeft ? '/'
+                : bx === right - 1 && right > previousRight ? '\\' : '|';
+            } else {
+              char = fromTop < roofHeight && roof === 'pitched' ? (bx === left ? '/' : '\\') : '|';
+            }
             light = depth === 1 ? 1 : .48;
           }
-          else if (fromTop === 0 && roof === 'flat') { char = '_'; light = .5; }
+          else if (fromTop === 0 && roof === 'pitched') { char = '-'; light = .5; }
           else if (floor && style === 0) { char = floorChar; light = depth === 1 ? 1 : .23; }
           else if (rib) { char = ribChar; light = depth === 1 ? .8 : .28; }
           else {
@@ -240,12 +289,15 @@
             cells[y * cols + x + bx].waveDelay = -4.2 * fromTop / h;
           }
         }
+        previousLeft = left;
+        previousRight = right;
       }
       const rooftop = roof === 'tower' ? 1 : random();
       if (rooftop < .08) {
         const center = x + Math.floor(w / 2);
         const aerial = Math.floor(range(2, 6));
-        for (let i = 1; i <= aerial; i++) set(center, top - i, i === aerial ? '+' : '|', palette, depth * .65);
+        const aerialBase = top - (roof === 'pitched' ? 1 : 0);
+        for (let i = 1; i <= aerial; i++) set(center, aerialBase - i, i === aerial ? '+' : '|', palette, depth * .65);
       } else if (roof === 'flat' && rooftop < .4) {
         const offset = Math.floor(range(1, Math.max(2, w - 5)));
         const equipment = pick([
@@ -255,14 +307,11 @@
           ['_____', '|:::|'],
         ]);
         equipment.forEach((line, row) => {
-          [...line].forEach((char, column) => set(x + offset + column, top - equipment.length + row, char, palette, depth * .55));
+          [...line].forEach((char, column) => {
+            if (char !== ' ') set(x + offset + column, top - equipment.length + row, char, palette, depth * .55);
+          });
         });
-      } else if (roof === 'flat' && rooftop < .65) {
-        const parapetChar = pick(['_', '=']);
-        for (let bx = 0; bx < w; bx++) {
-          set(x + bx, top - 1, bx === 0 || bx === w - 1 ? '|' : parapetChar, palette, depth * .45);
-        }
-      } else if (roof === 'flat' && rooftop < .9) {
+      } else if (roof === 'flat' && rooftop >= .65 && rooftop < .9) {
         const count = Math.floor(range(1, Math.min(5, Math.floor((w - 2) / 3)) + 1));
         let positions = Array.from({ length: w - 3 }, (_, index) => index + 1);
         for (let i = 0; i < count && positions.length; i++) {
@@ -343,19 +392,20 @@
       if (!eligibleGroups.length) return;
       const group = eligibleGroups.reduce((closest, candidate) =>
         Math.abs((candidate.start + candidate.end) / 2 - position) < Math.abs((closest.start + closest.end) / 2 - position) ? candidate : closest);
-      const w = Math.min(width, group.end - group.start);
+      const w = Math.min(roof === 'tower' ? Math.max(19, width) : width, group.end - group.start);
       const x = Math.max(group.start, Math.min(Math.floor(position - w / 2), group.end - w));
       building(x, w, Math.floor(rows * height), palette, 1, roof);
-      const center = x + Math.floor(w / 2);
+      const { roofLeft, roofRight } = buildings[buildings.length - 1];
+      const lightCol = x + Math.floor(range(roofLeft, roofRight));
       const top = rows - Math.floor(rows * height);
       let lightRow = top - 1;
-      while (lightRow >= 0 && cells[lightRow * cols + center]?.char === '|') lightRow--;
-      set(center, lightRow, '*', [255, 65, 65], 1);
+      while (lightRow >= 0 && cells[lightRow * cols + lightCol] && cells[lightRow * cols + lightCol].char !== ' ') lightRow--;
+      set(lightCol, lightRow, '*', [255, 65, 65], 1);
     }
     const landmarkPosition = cols * (random() < .5 ? range(.1, .3) : range(.7, .9));
-    landmark(landmarkPosition, landmarkWidth, .86, palettes[4], pick(['steps', 'crown', 'spire', 'tower']));
+    landmark(landmarkPosition, landmarkWidth, range(.82, .88), palettes[4], pick(['steps', 'crown', 'spire', 'tower']));
     if (random() < .18) {
-      landmark(cols * range(.72, .79), Math.max(14, landmarkWidth - 1), .76, palettes[5], 'spire');
+      landmark(cols * range(.72, .79), Math.max(14, landmarkWidth - 1), range(.72, .78), palettes[5], 'spire');
     }
     for (const group of groups) {
       for (let x = group.start; x <= group.end - 8;) {
@@ -481,8 +531,22 @@
   }
 
   function animate() {
-    timers.push(setInterval(updateWindowLights, 2000));
-    timers.push(setInterval(twinkleSky, 550));
+    var lightFrames = randInt(10, 120);
+    var skyFrames = randInt(30, 60);
+    function tick() {
+      lightFrames -= 1;
+      if (lightFrames <= 0) {
+        updateWindowLights();
+        lightFrames = randInt(10, 120);
+      }
+      skyFrames -= 1;
+      if (skyFrames <= 0) {
+        twinkleSky();
+        skyFrames = randInt(30, 60);
+      }
+      animationFrame = requestAnimationFrame(tick);
+    }
+    animationFrame = requestAnimationFrame(tick);
   }
 
   /* ---------- setup ---------- */
@@ -503,8 +567,7 @@
   var generatedWidth, generatedHeight;
 
   function generate() {
-    timers.forEach(clearInterval);
-    timers = [];
+    cancelAnimationFrame(animationFrame);
 
     generatedWidth = window.innerWidth;
     generatedHeight = window.innerHeight;
