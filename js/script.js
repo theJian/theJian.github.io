@@ -10,9 +10,17 @@
     { text: 'hi@chabuduo.in', href: 'mailto:hi@chabuduo.in' }
   ];
   /* written high in the sky; re-wrapped only when the screen is too narrow */
-  var MESSAGE = [
-    'we\'re entering a new era where exciting new things are possible,',
-    'but some things are being lost.'
+  var MESSAGES = [
+    [
+      'We\'re entering a new era where exciting new things are possible,',
+      'but some things are being lost.'
+    ],
+    [
+      'There are only two hard things in Computer Science:',
+      'cache invalidation and naming things.'
+    ],
+    ['Code never lies,', 'comments sometimes do.'],
+    ["We don't make mistakes,", 'just happy little accidents.']
   ];
 
   var pre = document.querySelector('#city');
@@ -21,6 +29,7 @@
   var rand = function (a, b) { return a + Math.random() * (b - a); };
   var randInt = function (a, b) { return Math.floor(rand(a, b + 1)); };
   var pick = function (arr) { return arr[Math.floor(Math.random() * arr.length)]; };
+  var MESSAGE = pick(MESSAGES);
 
   var cols, rows, groundRow, grid;
   var animationFrame;
