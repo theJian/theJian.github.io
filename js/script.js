@@ -500,13 +500,17 @@
     };
   }
 
+  var generatedWidth, generatedHeight;
+
   function generate() {
     timers.forEach(clearInterval);
     timers = [];
 
+    generatedWidth = window.innerWidth;
+    generatedHeight = window.innerHeight;
     var m = measure();
-    cols = Math.max(1, Math.floor(window.innerWidth / m.charW));
-    rows = Math.max(1, Math.floor(window.innerHeight / m.lineH));
+    cols = Math.max(1, Math.floor(generatedWidth / m.charW));
+    rows = Math.max(1, Math.floor(generatedHeight / m.lineH));
     groundRow = rows - Math.max(4, Math.round(rows * 0.1));
 
     grid = [];
@@ -527,6 +531,8 @@
   var resizeTimer;
   window.addEventListener('resize', function () {
     clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(generate, 200);
+    resizeTimer = setTimeout(function () {
+      if (window.innerWidth !== generatedWidth || window.innerHeight !== generatedHeight) generate();
+    }, 200);
   });
 })();
